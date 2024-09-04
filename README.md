@@ -1,6 +1,6 @@
 # Google Sheets and Database Synchronization
 
-**SheetsSync** project demonstrates a solution for real-time synchronization between Google Sheets and a database (e.g., MySQL). The goal is to ensure consistency between the data in Google Sheets and the database by automatically synchronizing changes in both directions.
+**SheetSync** project demonstrates a solution for real-time synchronization between Google Sheets and a database (e.g., MySQL). The goal is to ensure consistency between the data in Google Sheets and the database by automatically synchronizing changes in both directions.
 
 ![SheetsSync](logo-sheetssync.png)
 
