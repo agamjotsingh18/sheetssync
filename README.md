@@ -68,3 +68,35 @@ CREATE TABLE records (
   value VARCHAR(255) NOT NULL
 );
 ```
+
+
+## Approach
+### Setup and Configuration:
+
+Modules: We use googleapis for interacting with Google Sheets, path to handle file paths, google-auth-library for authentication, and dotenv to manage environment variables.
+Environment Variables, Google Sheets API Initialization: Load environment variables from a .env file to get sensitive data like the Google Sheets ID and the service account key file path.
+API Client: Instantiate a Sheets API client to make requests to Google Sheets.
+
+
+### Functions:
+
+- readSheet(range):
+
+Purpose: Reads data from a specified range in the Google Sheet.
+Steps: Uses the Sheets API to fetch values from the given range and returns the data. If there’s an error, it logs it and re-throws it.
+
+- writeSheet(range, values):
+
+Purpose: Writes data to a specified range in the Google Sheet.
+Steps: Find Empty Row: Calls getFirstEmptyRow to determine the first empty row in the sheet.
+Append Data: Appends the provided values to the determined row. If there’s an error, it logs it and re-throws it.
+
+- getFirstEmptyRow(spreadsheetId):
+
+Purpose: Determines the first empty row in the sheet.
+Steps: Fetch Data: Retrieves all existing rows from column A.
+Calculate Empty Row: Calculates the next available row based on the current row count. If there’s an error, it logs it and re-throws it.
+
+## Challenges
+
+During the project, I encountered several challenges related to building the synchronization logic between Google Sheets and the database. One of the primary difficulties was ensuring data consistency, which involved handling discrepancies and conflicts between the two data sources. Implementing accurate range selection and data parsing for reading data from Google Sheets proved complex, especially when the data format or location varied. Writing data introduced its own set of challenges, such as accurately finding the first empty row in the sheet and managing concurrency issues to prevent data from being overwritten or misaligned. Additionally, error handling required careful attention to ensure that errors were logged properly and that there were strategies in place for retrying failed operations and recovering from issues without compromising data integrity. Overall, the project required navigating these complexities to create a reliable synchronization system.
