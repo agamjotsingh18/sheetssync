@@ -1,43 +1,48 @@
 const { readSheet, writeSheet } = require('../services/googleService');
-const { getRecords, updateRecord } = require('../services/dbService');
+const { getRecords, updateRecord, getCount } = require('../services/dbService');
 const { handleConflict } = require('../utils/conflictHandler');
 
 async function syncData() {
   try {
-    const sheetData = await readSheet('Sheet1!A2:B');
+    const sheetData = await readSheet('Sheet1!A2:D');
     const dbData = await getRecords();
+    console.log(dbData, "this is dbData");
 
-    // Compare and synchronize data
-    const sheetDataMap = new Map(sheetData.map((row, index) => [index + 1, row]));
+    const sheetDataMap = new Map(sheetData.map(row => [row[0], row.slice()]));
 
-    const dbUpdates = [];
-    const sheetUpdates = [];
-
-    dbData.forEach(dbRow => {
-      const sheetRow = sheetDataMap.get(dbRow.id);
+    for (const dbRow of dbData) {
+      const sheetRow = sheetDataMap.get(dbRow.id.toString());
 
       if (sheetRow) {
-        if (sheetRow[1] !== dbRow.value) {
-          const resolvedValue = handleConflict(sheetRow[1], dbRow.value);
-          dbUpdates.push(updateRecord(dbRow.id, { name: sheetRow[0], value: resolvedValue }));
-          sheetUpdates.push({ index: dbRow.id, value: resolvedValue });
+
+      } else {
+        try {
+          await writeSheet('Sheet1!A:A', [
+            [dbRow.id, dbRow.name, dbRow.value]
+          ]);
+        } catch (error) {
+          console.error("Error inserting data", error);
         }
-        sheetDataMap.delete(dbRow.id);
       }
-    });
+    };
 
-    sheetDataMap.forEach((row, index) => {
-      dbUpdates.push(updateRecord(index, { name: row[0], value: row[1] }));
-      sheetUpdates.push({ index, value: row[1] });
-    });
+    for (const [id, row] of sheetDataMap) {
 
-    await Promise.all(dbUpdates);
-    await Promise.all(sheetUpdates.map(update => writeSheet(`Sheet1!B${update.index + 2}`, [[update.value]])));
+      const isIdPresent = dbData.some(item => item.id.toString() === row[0]);
 
+      if (isIdPresent) {
+        console.log(`ID ${row[0]} is present in the data.`);
+      } else {
+        console.log(`ID ${row[0]} is not present in the data.`);
+        await updateRecord([parseInt(row[0], 10), row[1], row[2]]);
+      }
+    }
     console.log('Synchronization complete');
   } catch (error) {
     console.error('Error during synchronization:', error);
   }
 }
 
-module.exports = { syncData };
+module.exports = {
+  syncData
+};

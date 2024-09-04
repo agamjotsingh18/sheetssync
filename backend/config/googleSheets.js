@@ -1,5 +1,7 @@
 const { sheets, spreadsheetId } = require('../services/googleService.js');
 
+const sheetName="Sheet1";
+
 async function readSheet(range) {
     try {
         const response = await sheets.spreadsheets.values.get({
@@ -14,17 +16,21 @@ async function readSheet(range) {
 }
 
 async function writeSheet(range, values) {
+
     try {
-        await sheets.spreadsheets.values.update({
+        const response= await sheets.spreadsheets.values.append({
             spreadsheetId,
             range,
             valueInputOption: 'RAW',
-            resource: { values },
+            resource: { values: [values], },
         });
+
+        console.log('Data inserted successfully:', response.data);
     } catch (error) {
         console.error('Error writing sheet:', error);
         throw error;
     }
 }
+
 
 module.exports = { readSheet, writeSheet };
